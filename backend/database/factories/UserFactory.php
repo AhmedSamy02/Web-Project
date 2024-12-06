@@ -28,7 +28,7 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName($gender),
             'email' => fake()->unique()->safeEmail(),
             'date_of_birth' => '2001-07-06',
-            'email_verified_at' => now(),
+            // 'email_verified_at' => now(),
             'city' => fake()->city(),
             'address' => fake()->optional()->address(),
             'role' => 'F',
@@ -43,10 +43,10 @@ class UserFactory extends Factory
     /**
      * Indicate that the model's email address should be unverified.
      */
-    public function unverified(): static
-    {
-        return $this->state(fn(array $attributes) => [
-            'email_verified_at' => null,
-        ]);
-    }
+    // public function unverified(): static
+    // {
+    //     return $this->state(fn(array $attributes) => [
+    //         'email_verified_at' => null,
+    //     ]);
+    // }
 }
