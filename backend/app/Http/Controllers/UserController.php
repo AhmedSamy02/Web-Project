@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    protected  $userService = null;
+    protected $userService = null;
 
     public function __construct(UserService $userService)
     {
@@ -16,7 +16,12 @@ class UserController extends Controller
 
     public function index()
     {
+        // Get all users
         $users = $this->userService->getAll();
         return response()->json($users);
     }
+
+
+
+
 }
