@@ -25,13 +25,13 @@ class UserFactory extends Factory
     {
         return [
             'first_name' => fake()->firstName($gender = fake()->randomElement(['M', 'F'])),
-            'last_name' => fake()->lastName($gender),
+            'last_name' => fake()->lastName(),
             'email' => fake()->unique()->safeEmail(),
-            'date_of_birth' => '2001-07-06',
+            'date_of_birth' => fake()->date(),
             // 'email_verified_at' => now(),
             'city' => fake()->city(),
             'address' => fake()->optional()->address(),
-            'role' => 'F',
+            'role' => fake()->randomElement(['F', 'M']),
             'gender' => $gender,
             'status' => 1,
             'username' => fake()->unique()->userName(),
