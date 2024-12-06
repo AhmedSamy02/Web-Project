@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
@@ -12,7 +13,13 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
+Route::group(['prefix' => 'admin'], function () {
+    Route::post('/approve/{username}', [AdminController::class, 'approveUser']);
+    Route::post('/delete/{username}', [AdminController::class, 'deleteUser']);
+    Route::get('/users', [AdminController::class, 'indexUsers']);
+    Route::get('/unapproved_users', [AdminController::class, 'getUnapprovedUsers']);
+});
+
 Route::group(['prefix' => 'users'], function () {
     Route::get('/', [UserController::class, 'index']);
-    
 });
