@@ -1,35 +1,33 @@
-import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
-import NavBar from '../NavBar/NavBar';
-import { useNavigate } from 'react-router-dom';
+import React, { useContext } from "react";
+import { Box, Button, Typography } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../Context";
+
 export default function Home() {
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
-  const handleShowAllMatches = () => {
-    navigate('/matches');
-  };
 
   return (
     <Box
       sx={{
-        backgroundImage: `url('/Home.avif')`, 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center',
-        minHeight: '100vh', 
-        display: 'flex',
-        flexDirection: 'column',
-        color: 'white',
+        backgroundImage: `url('/Home.avif')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "99vh",
+        display: "flex",
+        flexDirection: "column",
+        color: "white",
       }}
     >
-      <NavBar />
-      <Box 
-        sx={{ 
-          flexGrow: 1, 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+      <Box
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           padding: 2,
-          textAlign: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.6)', // Semi-transparent background
+          textAlign: "center",
+          backgroundColor: "rgba(0, 0, 0, 0.6)",
         }}
       >
         <Box sx={{ maxWidth: 600 }}>
@@ -42,18 +40,34 @@ export default function Home() {
           <Button
             variant="contained"
             color="success"
-            onClick={handleShowAllMatches}
-            sx={{ 
-              mt: 2, 
-              padding: '12px 24px',
-              fontSize: '1.2rem',
-              '&:hover': {
-                backgroundColor: 'green', // Customize hover color
-              }
-            }}
+            onClick={() => navigate("/matches")}
+            sx={{ mt: 2, padding: "12px 24px", fontSize: "1.2rem" }}
           >
             Show All Matches
           </Button>
+
+          {user?.role === "Admin" && (
+            <>
+              <Button variant="contained" color="success" onClick={() => navigate("/pendingusers")} sx={{ mt: 2, ml: 2 ,padding: "12px 24px", fontSize: "1.2rem" }}>
+                Show Pending Users
+              </Button>
+              <Button variant="contained" color="success" onClick={() => navigate("/allusers")} sx={{ mt: 2 ,padding: "12px 24px", fontSize: "1.2rem"  }}>
+                Show All Users
+              </Button>
+            </>
+          )}
+
+          {user?.role === "Manager" && (
+            <Button variant="contained" color="success" onClick={() => navigate("/viewStadium")} sx={{ mt: 2, ml: 2,padding: "12px 24px", fontSize: "1.2rem"  }}>
+              View Stadium
+            </Button>
+          )}
+
+          {user?.role === "Fan" && (
+            <Button variant="contained" color="success" onClick={() => navigate("/tickets")} sx={{ mt: 2, ml: 2 ,padding: "12px 24px", fontSize: "1.2rem" }}>
+              Show Tickets
+            </Button>
+          )}
         </Box>
       </Box>
     </Box>

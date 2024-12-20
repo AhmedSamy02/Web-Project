@@ -1,68 +1,47 @@
-import React, { useState } from "react"; 
-import {
-    Box,
-    IconButton,
-    Typography,
-    Avatar,
-    Button
-} from "@mui/material";
-import FlexBetween from "../widgets/FlexBetween";
+import React, { useContext } from "react";
+import { Box, Button, Typography, Avatar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../Context";
 
 export default function NavBar() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const fullName = "Kareem Samy";
-    const navigate = useNavigate();
-    const neutralLight = "#f3f3f3";
+  const { user, logOut } = useContext(UserContext);
+  const navigate = useNavigate();
 
-    const handleProfileClick = () => {
-        alert("Go to profile");
-    };
+  const handleLogOut = () => {
+    logOut();
+    navigate("/");
+  };
 
-    const handleSignIn = () => {
-        // setIsLoggedIn(true);
-        navigate("/register");
-    };
+  const handleSignIn = () => {
+    navigate("/register");
+  };
 
-    const handleLogOut = () => {
-        // setIsLoggedIn(false);
-        alert("Logged Out");
-    };
+  return (
+    <Box padding="0.7rem 6%" backgroundColor="green" display="flex" justifyContent="space-between">
+      <Typography
+        fontWeight="bold"
+        fontSize="clamp(1rem,2rem,2.25rem)"
+        color="white"
+        sx={{ "&:hover": { cursor: "pointer" } }}
+        onClick={() => navigate("/")}
+      >
+        Tazkarti
+      </Typography>
 
-    return (
-        <FlexBetween padding="0.7rem 6%" backgroundColor={"green"}>
-            <FlexBetween gap="1.75rem">
-                <Typography
-                    fontWeight="bold"
-                    fontSize="clamp(1rem,2rem,2.25rem)"
-                    color='white'
-                    sx={{
-                        "&:hover": {
-                            cursor: "pointer",
-                            color: "transparent",
-                        },
-                    }}>
-                    Tazkarti
-                </Typography>
-            </FlexBetween>
-            {/* User-specific UI */}
-            <FlexBetween gap="2rem">
-                {isLoggedIn ? (
-                    <>
-                        {/* Avatar */}
-                        <IconButton onClick={handleProfileClick}>
-                            <Avatar alt={fullName} src="/path/to/profile/image.jpg" sx={{ width: "35px", height: "35px" }}/>
-                        </IconButton>
-                        <Button onClick={handleLogOut}>
-                            <Typography color='white'>Log Out</Typography>
-                        </Button>
-                    </>
-                ) : (
-                    <Button onClick={handleSignIn}>
-                        <Typography color='white'>Sign In</Typography>
-                    </Button>
-                )}
-            </FlexBetween>
-        </FlexBetween>
-    );
+      {user ? (
+        <Box display="flex" alignItems="center" gap="1rem">
+          {user.role === "Fan" && (
+            <Avatar alt={user.username} src="/path/to/profile/image.jpg" sx={{ width: 35, height: 35 }} />
+          )}
+          <Button onClick={handleLogOut}>
+            <Typography color="white">Log Out</Typography>
+          </Button>
+        </Box>
+      ) : (
+        <Button onClick={handleSignIn}>
+          <Typography color="white">Sign In</Typography>
+        </Button>
+      )}
+    </Box>
+  );
 }

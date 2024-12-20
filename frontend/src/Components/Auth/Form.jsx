@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import {
   Box,
   TextField,
@@ -10,7 +11,9 @@ import {
 } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
-
+import { useNavigate } from 'react-router-dom';
+import { UserContext } from "../../Context";
+import { useContext } from "react";
 // Define validation schema
 const registerSchema = yup.object().shape({
   username: yup.string().required("required").min(3, "Username must be at least 3 characters"),
@@ -55,10 +58,32 @@ export default function Form() {
   const [pageType, setPageType] = useState("login");
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
+  const navigate = useNavigate();
+  const { login } = useContext(UserContext);
 
-  // Handle form submission (no actual API call)
-  const handleFormSubmit = async (values) => {
-    console.log("Form Submitted", values);
+  // Handle form submission (API call for login and register)
+  const handleFormSubmit = async (values, { resetForm }) => { // Add the second parameter for resetForm
+    try {
+      const url = isLogin
+        ? "http://localhost:3001/auth/login"
+        : "http://localhost:3001/auth/register";
+
+      const response = await axios.post(url, values);
+
+      if (response.data.token) {
+        console.log("Login Successful", response.data);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+        login(response.data.user);
+        navigate("/");
+      } else {
+        console.log("Registration Successful", response.data);
+        resetForm(); // Reset the form fields
+        setPageType("login"); // Switch to login page
+      }
+    } catch (error) {
+      console.error("Error during form submission:", error.response.data);
+    }
   };
 
   return (
