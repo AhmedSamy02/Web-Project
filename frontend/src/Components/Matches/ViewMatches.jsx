@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import {
   CardContent,
@@ -11,23 +11,82 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import { FaCalendarAlt } from "react-icons/fa";
 
 const MatchCard = ({ matchDetails, onEdit }) => {
+  const socketRef = useRef(null);
   const { homeTeam, awayTeam, venue, dateTime, linesmen, mainReferee } = matchDetails;
   const data = localStorage.getItem("user");
-  const userType = JSON.parse(data).role;
+  const user = JSON.parse(data);
+  const userType = data ? user.role : "Guest";
+  const userId = user ? user._id : null;
+
   const [openBooking, setOpenBooking] = useState(false);
   const [selectedSeat, setSelectedSeat] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState({ cardNumber: "", pin: "" });
   const [stadiumSize, setStadiumSize] = useState({ numberOfRows: 0, numberOfSeatsPerRow: 0 });
+  const [bookedSeats, setBookedSeats] = useState([]);
+  const [userBookedSeat, setUserBookedSeat] = useState(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  
+  // Snackbar states
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+
+  useEffect(() => {
+    if (openBooking) {
+      getStadiumSize(venue);
+      getBookedSeats();
+    }
+  }, [openBooking]);
+
+  useEffect(() => {
+    const connectWebSocket = () => {
+      const socket = new WebSocket('ws://localhost:8080');
+
+      socket.onopen = () => {
+        console.log('Connected to WebSocket');
+      };
+
+      socket.onmessage = (message) => {
+        const data = JSON.parse(message.data);
+        if (data.matchId === matchDetails._id) {
+          setBookedSeats((prevBookedSeats) => {
+            return [...new Set([...prevBookedSeats, data.seat])];
+          });
+        }
+      };
+
+      socket.onclose = () => {
+        console.log('Disconnected from WebSocket');
+        setTimeout(connectWebSocket, 1000);
+      };
+
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      return socket;
+    };
+
+    socketRef.current = connectWebSocket();
+
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
+    };
+  }, [matchDetails._id]);
 
   const getStadiumSize = async (venue) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get(`http://localhost:3001/manager/stadium/${venue}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setStadiumSize(response.data);
     } catch (error) {
@@ -35,13 +94,31 @@ const MatchCard = ({ matchDetails, onEdit }) => {
     }
   };
 
+  const getBookedSeats = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `http://localhost:3001/fan/bookedTickets/${matchDetails._id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setBookedSeats(response.data.bookedSeats.map((seat) => Number(seat) || 0));
+
+      const userBooking = response.data.userBooking;
+      if (userBooking) {
+        setUserBookedSeat(userBooking.seat);
+        showSnackbar(`You have already booked seat ${userBooking.seat + 1}.`, "info");
+      }
+    } catch (error) {
+      console.error("Error fetching booked seats:", error);
+    }
+  };
+  
   const handleOpenBooking = () => {
-    if (userType === "guest") {
-      alert("Please log in to book tickets.");
-    } else if (userType === "admin") {
-      alert("Admins cannot book tickets.");
+    if (userType === "Guest") {
+      showSnackbar("Please log in to book tickets.", "warning");
+    } else if (userType === "Admin") {
+      showSnackbar("Admins cannot book tickets.", "warning");
     } else {
-      getStadiumSize(venue);
       setOpenBooking(true);
     }
   };
@@ -50,42 +127,72 @@ const MatchCard = ({ matchDetails, onEdit }) => {
     setOpenBooking(false);
     setSelectedSeat(null);
     setPaymentInfo({ cardNumber: "", pin: "" });
+    setIsProcessingPayment(false);
   };
 
   const handleSeatSelection = (seat) => {
-    setSelectedSeat(seat);
-  };
-
-  const handlePayment = () => {
-    if (paymentInfo.cardNumber && paymentInfo.pin) {
-      alert(`Ticket booked for seat ${selectedSeat}!`);
-      handleCloseBooking();
-    } else {
-      alert("Please enter valid payment details.");
+    if (userType === "Manager") {
+      showSnackbar("Managers cannot book tickets.", "warning");
+      return;
+    }
+    if (!isProcessingPayment) {
+      setSelectedSeat(seat);
     }
   };
 
-  const seats = Array.from({ length: stadiumSize.numberOfRows }, (_, rowIndex) =>
-    Array.from(
-      { length: stadiumSize.numberOfSeatsPerRow },
-      (_, seatIndex) => `Row ${rowIndex + 1}, Seat ${seatIndex + 1}`
-    )
-  ).flat();
+  const handlePayment = async () => {
+    if (paymentInfo.cardNumber && paymentInfo.pin) {
+      setIsProcessingPayment(true);
+      try {
+        const token = localStorage.getItem("token");
+        if (bookedSeats.includes(selectedSeat)) {
+          showSnackbar("Sorry, this seat has just been booked by another user.", "error");
+          setIsProcessingPayment(false);
+          return;
+        }
+        
+        await axios.post(
+          `http://localhost:3001/fan/bookTicket`,
+          {
+            matchId: matchDetails._id,
+            seat: selectedSeat,
+            userId,
+            paymentInfo,
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
 
-  // Parse dateTime to get match date and time
-  const matchDate = new Date(dateTime).toLocaleDateString(); 
-  const matchTime = new Date(dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); 
+        showSnackbar(`Ticket booked for seat ${selectedSeat + 1}!`, "success");
+        handleCloseBooking();
+      } catch (error) {
+        showSnackbar("Error booking the ticket: " + error.response.data.message, "error");
+      } finally {
+        setIsProcessingPayment(false);
+      }
+    } else {
+      showSnackbar("Please enter valid payment details.", "warning");
+    }
+  };
+
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const totalSeats = stadiumSize.numberOfRows * stadiumSize.numberOfSeatsPerRow;
+  const seats = Array.from({ length: totalSeats }, (_, index) => index);
+
+  const matchDate = new Date(dateTime).toLocaleDateString();
+  const matchTime = new Date(dateTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   return (
     <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        marginBottom: 3,
-        boxShadow: 3,
-        borderRadius: 2,
-        width: "80%",
-      }}
+      sx={{ display: "flex", flexDirection: "column", marginBottom: 3, boxShadow: 3, borderRadius: 2, width: "80%" }}
     >
       <CardContent sx={{ padding: 2 }}>
         <Grid container spacing={2} justifyContent="space-between" alignItems="center">
@@ -128,8 +235,9 @@ const MatchCard = ({ matchDetails, onEdit }) => {
               color="success"
               onClick={handleOpenBooking}
               sx={{ width: "100%", fontWeight: "bold", fontSize: "16px" }}
+              disabled={userBookedSeat !== null}
             >
-              Book Ticket
+              {userBookedSeat !== null ? `Seat ${userBookedSeat + 1} Booked` : "Book Ticket"}
             </Button>
           ) : (
             <Typography variant="body1" color="error" align="center">
@@ -137,17 +245,18 @@ const MatchCard = ({ matchDetails, onEdit }) => {
             </Typography>
           )}
         </Box>
-        {(userType === "Manager" )?
-        <Box sx={{ marginTop: 2, textAlign: "center" }}>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={onEdit} 
-            sx={{ width: "100%", fontWeight: "bold", fontSize: "16px" }}
-          >
-            Edit Match
-          </Button>
-        </Box>:null}
+        {userType === "Manager" ? (
+          <Box sx={{ marginTop: 2, textAlign: "center" }}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={onEdit}
+              sx={{ width: "100%", fontWeight: "bold", fontSize: "16px" }}
+            >
+              Edit Match
+            </Button>
+          </Box>
+        ) : null}
       </CardContent>
 
       {/* Booking Dialog */}
@@ -160,15 +269,26 @@ const MatchCard = ({ matchDetails, onEdit }) => {
                 Select a Seat:
               </Typography>
               <Grid container spacing={1}>
-                {seats.map((seat, index) => (
-                  <Grid item xs={3} key={index}>
+                {seats.map((seat) => (
+                  <Grid item xs={3} key={seat}>
                     <Button
                       variant={selectedSeat === seat ? "contained" : "outlined"}
-                      color={selectedSeat === seat ? "primary" : "default"}
+                      color={
+                        selectedSeat === seat
+                          ? "primary"
+                          : bookedSeats.includes(seat)
+                          ? "error"
+                          : "default"
+                      }
                       fullWidth
                       onClick={() => handleSeatSelection(seat)}
+                      disabled={bookedSeats.includes(seat) || isProcessingPayment} // Disable if seat is booked or payment is processing
+                      sx={{
+                        color: bookedSeats.includes(seat) ? "white" : "inherit",
+                        backgroundColor: bookedSeats.includes(seat) ? "red" : "inherit",
+                      }}
                     >
-                      {seat}
+                      {seat + 1}
                     </Button>
                   </Grid>
                 ))}
@@ -199,6 +319,7 @@ const MatchCard = ({ matchDetails, onEdit }) => {
             </>
           )}
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleCloseBooking} color="secondary">
             Cancel
@@ -208,12 +329,19 @@ const MatchCard = ({ matchDetails, onEdit }) => {
               Next
             </Button>
           ) : (
-            <Button onClick={handlePayment} color="primary">
+            <Button onClick={handlePayment} color="primary" disabled={isProcessingPayment}>
               Pay
             </Button>
           )}
         </DialogActions>
       </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
@@ -222,7 +350,7 @@ const MatchCard = ({ matchDetails, onEdit }) => {
 
 const ViewMatches = () => {
   const data = localStorage.getItem("user");
-  const userType = JSON.parse(data).role;
+  const userType = data ?JSON.parse(data).role:"Guest";
   const [openDialog, setOpenDialog] = useState(false);
   const [editMatch, setEditMatch] = useState(null);
   const [matches, setMatches] = useState([]);

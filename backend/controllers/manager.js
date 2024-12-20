@@ -18,6 +18,15 @@ const getMatches = async (req, res) => {
     }
 }
 
+const getMatch = async (req, res) => {
+    try {
+        const match = await Match.findById(req.params.id);
+        res.status(200).json(match);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 const addMatch = async (req, res) => {
     const match = req.body;
     console.log("dddddddd");
@@ -87,4 +96,4 @@ const getTeams = async (req, res) => {
 
 
 
-module.exports = { getStadiums, getMatches, addMatch, addStadium, updateMatch, getStadium, getTeam, getTeams }; 
+module.exports = { getStadiums, getMatches, addMatch, addStadium, updateMatch, getStadium, getTeam, getTeams, getMatch }; 

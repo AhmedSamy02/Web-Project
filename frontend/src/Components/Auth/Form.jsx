@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import {
   Box,
@@ -8,13 +8,14 @@ import {
   Typography,
   Button,
   MenuItem,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../Context";
-import { useContext } from "react";
-// Define validation schema
+
 const registerSchema = yup.object().shape({
   username: yup.string().required("required").min(3, "Username must be at least 3 characters"),
   password: yup.string().required("required"),
@@ -23,7 +24,7 @@ const registerSchema = yup.object().shape({
   birthDate: yup.date().required("required"),
   gender: yup.string().required("required"),
   city: yup.string().required("required"),
-  address: yup.string().nullable(), // Optional field
+  address: yup.string().nullable(),
   email: yup.string().email("invalid email").required("required"),
   role: yup.string().oneOf(["Manager", "Fan"], "Invalid Role").required("required"),
 });
@@ -33,7 +34,6 @@ const loginSchema = yup.object().shape({
   password: yup.string().required("required"),
 });
 
-// Initial form values
 const initialValuesRegister = {
   username: "",
   password: "",
@@ -44,11 +44,11 @@ const initialValuesRegister = {
   city: "",
   address: "",
   email: "",
-  role: "Fan", // Default role
+  role: "Fan",
 };
 
 const initialValuesLogin = {
-  username: "", // Add username field for login
+  username: "",
   password: "",
 };
 
@@ -61,8 +61,11 @@ export default function Form() {
   const navigate = useNavigate();
   const { login } = useContext(UserContext);
 
-  // Handle form submission (API call for login and register)
-  const handleFormSubmit = async (values, { resetForm }) => { // Add the second parameter for resetForm
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+
+  const handleFormSubmit = async (values, { resetForm }) => {
     try {
       const url = isLogin
         ? "http://localhost:3001/auth/login"
@@ -70,20 +73,36 @@ export default function Form() {
 
       const response = await axios.post(url, values);
 
-      if (response.data.token) {
-        console.log("Login Successful", response.data);
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
-        login(response.data.user);
-        navigate("/");
+      if (isLogin) {
+        if (response.data.token) {
+          console.log("Login Successful", response.data);
+          localStorage.setItem("token", response.data.token);
+          localStorage.setItem("user", JSON.stringify(response.data.user));
+          login(response.data.user);
+          navigate("/");
+        } else {
+          showSnackbar("Invalid username or password", "error");
+        }
       } else {
         console.log("Registration Successful", response.data);
-        resetForm(); // Reset the form fields
-        setPageType("login"); // Switch to login page
+        resetForm();
+        setPageType("login");
       }
     } catch (error) {
-      console.error("Error during form submission:", error.response.data);
+      const errorMessage = error.response?.data?.message || "Something went wrong";
+      console.error("Error during form submission:", errorMessage);
+      showSnackbar(errorMessage, "error");
     }
+  };
+
+  const showSnackbar = (message, severity) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -192,7 +211,7 @@ export default function Form() {
                   onBlur={handleBlur}
                   error={touched.birthDate && Boolean(errors.birthDate)}
                   helperText={touched.birthDate && errors.birthDate}
-                  InputLabelProps={{ shrink: true }} // Ensures the label stays above the input
+                  InputLabelProps={{ shrink: true }}
                   sx={{ gridColumn: "span 4", backgroundColor: "#fff" }}
                 />
                 <TextField
@@ -257,7 +276,6 @@ export default function Form() {
                 </TextField>
               </>
             )}
-            {/* BUTTONS */}
             <Box>
               <Button
                 fullWidth
@@ -279,10 +297,10 @@ export default function Form() {
                 }}
                 sx={{
                   textDecoration: "underline",
-                  color: "#007bff", // Blue text
+                  color: "#007bff",
                   "&:hover": {
                     cursor: "pointer",
-                    color: "#0056b3", // Darker blue on hover
+                    color: "#0056b3",
                   },
                 }}
               >
@@ -292,6 +310,16 @@ export default function Form() {
               </Typography>
             </Box>
           </Box>
+
+          <Snackbar
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            onClose={handleSnackbarClose}
+          >
+            <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: "100%" }}>
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
         </form>
       )}
     </Formik>

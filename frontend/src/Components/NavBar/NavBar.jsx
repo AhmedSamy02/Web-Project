@@ -7,6 +7,9 @@ export default function NavBar() {
   const { user, logOut } = useContext(UserContext);
   const navigate = useNavigate();
 
+  const handleProfile = () => {
+    navigate("/profile");
+  }
   const handleLogOut = () => {
     logOut();
     navigate("/");
@@ -31,7 +34,7 @@ export default function NavBar() {
       {user ? (
         <Box display="flex" alignItems="center" gap="1rem">
           {user.role === "Fan" && (
-            <Avatar alt={user.username} src="/path/to/profile/image.jpg" sx={{ width: 35, height: 35 }} />
+            <Avatar alt={user.username} src="/path/to/profile/image.jpg" sx={{ width: 35, height: 35 }} onClick={handleProfile}/>
           )}
           <Button onClick={handleLogOut}>
             <Typography color="white">Log Out</Typography>

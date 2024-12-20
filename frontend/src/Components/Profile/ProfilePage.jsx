@@ -1,35 +1,107 @@
 import React, { useState } from "react";
-import {
-    Container,
-    Grid,
-    TextField,
-    Button,
-    MenuItem,
-    Typography,
-} from "@mui/material";
-import DatePicker from "@mui/lab/DatePicker";
-import AdapterDateFns from "@mui/lab/AdapterDateFns";
-import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import { 
+    Container, 
+    Grid, 
+    TextField, 
+    Button, 
+    Typography, 
+    Snackbar 
+} from "@mui/material"; 
+import axios from 'axios'; // Import Axios
 
 const ProfilePage = (props) => {
-    const [name, setFName] = useState(props.data.name);
-    const [password, setPassword] = useState("");
+    const [username, setUsername] = useState(props.data.username);
+    const [email, setEmail] = useState(props.data.email);
+    const [newPassword, setNewPassword] = useState(""); // State for new password
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [selectedDate, setSelectedDate] = useState(props.data.birthDate);
-    const [gender, setGender] = useState(props.data.gender);
-    const [city, setCity] = useState(props.data.city);
-    const [address, setAddress] = useState(props.data.address);
+    const [errorMessage, setErrorMessage] = useState(""); // State for error messages
+    const [successMessage, setSuccessMessage] = useState(""); // State for success messages
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+    // Function to handle username update
+    const handleUsernameUpdate = async () => {
         const body = {
-            name: name,
-            gender,
-            address,
-            city,
-            birthDate: selectedDate,
+            username,
+            userId: props.data._id,
         };
-        console.log("Updated Data:", body);
+
+        try {
+            const response = await axios.put('http://localhost:3001/fan/edit', body, { 
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+            });
+
+            setSuccessMessage("Username updated successfully!");
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+            console.log("Username updated successfully:", response.data);
+        } catch (error) {
+            if (error.response) {
+                setErrorMessage(error.response.data.msg); // Specific error from server
+            } else {
+                setErrorMessage("Server error: " + error.message); // Handle other errors
+            }
+        }
+    };
+
+    // Function to handle email update
+    const handleEmailUpdate = async () => {
+        const body = {
+            email,
+            userId: props.data._id,
+        };
+
+        try {
+            const response = await axios.put('http://localhost:3001/fan/edit', body, { 
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+            });
+
+            setSuccessMessage("Email updated successfully!");
+            localStorage.setItem("user", JSON.stringify(response.data.user));
+            console.log("Email updated successfully:", response.data);
+        } catch (error) {
+            if (error.response) {
+                setErrorMessage(error.response.data.msg); // Specific error from server
+            } else {
+                setErrorMessage("Server error: " + error.message); // Handle other errors
+            }
+        }
+    };
+
+    // Function to handle password update
+    const handlePasswordUpdate = async () => {
+        if (newPassword !== confirmPassword) {
+            setErrorMessage("New passwords do not match");
+            return;
+        }
+
+        const body = {
+            password: newPassword,
+            userId: props.data._id,
+            oldPassword: props.data.oldPassword // Assuming oldPassword is passed in props.data
+        };
+
+        try {
+            const response = await axios.put('http://localhost:3001/fan/edit', body, { 
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+            });
+
+            // Clear password fields after successful update
+            setNewPassword("");
+            setConfirmPassword("");
+
+            setSuccessMessage("Password updated successfully!");
+            console.log("Password updated successfully:", response.data);
+        } catch (error) {
+            if (error.response) {
+                setErrorMessage(error.response.data.msg); // Specific error from server
+            } else {
+                setErrorMessage("Server error: " + error.message); // Handle other errors
+            }
+        }
     };
 
     return (
@@ -38,95 +110,95 @@ const ProfilePage = (props) => {
                 Edit Profile
             </Typography>
             
-            <form onSubmit={handleSubmit}>
-                <Grid container spacing={3}>
-                    {/* First Name */}
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            label="Name"
-                            fullWidth
-                            value={name}
-                            onChange={(e) => setFName(e.target.value)}
-                        />
-                    </Grid>
-
-                    {/* Password */}
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            label="Password"
-                            type="password"
-                            fullWidth
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </Grid>
-
-                    {/* Confirm Password */}
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            label="Confirm Password"
-                            type="password"
-                            fullWidth
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                        />
-                    </Grid>
-
-                    {/* Gender */}
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            select
-                            label="Gender"
-                            fullWidth
-                            value={gender}
-                            onChange={(e) => setGender(e.target.value)}
-                        >
-                            <MenuItem value="male">Male</MenuItem>
-                            <MenuItem value="female">Female</MenuItem>
-                            <MenuItem value="other">Other</MenuItem>
-                        </TextField>
-                    </Grid>
-
-                    {/* City */}
-                    <Grid item xs={12} md={6}>
-                        <TextField
-                            label="City"
-                            fullWidth
-                            value={city}
-                            onChange={(e) => setCity(e.target.value)}
-                        />
-                    </Grid>
-
-                    {/* Address */}
-                    <Grid item xs={12} md={12}>
-                        <TextField
-                            label="Address"
-                            fullWidth
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                        />
-                    </Grid>
-
-                    {/* Birthdate */}
-                    <Grid item xs={12} md={6}>
-                        <LocalizationProvider dateAdapter={AdapterDateFns}>
-                            <DatePicker
-                                label="Birthdate"
-                                value={selectedDate}
-                                onChange={(newDate) => setSelectedDate(newDate)}
-                                renderInput={(params) => <TextField {...params} fullWidth />}
-                            />
-                        </LocalizationProvider>
-                    </Grid>
-
-                    {/* Submit Button */}
-                    <Grid item xs={12}>
-                        <Button type="submit" variant="contained" color="success">
-                            Update
-                        </Button>
-                    </Grid>
+            <Grid container spacing={3}>
+                {/* Row for Username */}
+                <Grid item xs={12} md={6}>
+                    <TextField
+                        label="Username"
+                        fullWidth
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                    />
                 </Grid>
-            </form>
+                <Grid item xs={12}>
+                    <Button 
+                        type="button" 
+                        variant="contained" 
+                        color="success" 
+                        onClick={handleUsernameUpdate} // Update username
+                    >
+                        Update Username
+                    </Button>
+                </Grid>
+
+                {/* Row for Email */}
+                <Grid item xs={12} md={6}>
+                    <TextField
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <Button 
+                        type="button" 
+                        variant="contained" 
+                        color="success" 
+                        onClick={handleEmailUpdate} // Update email
+                    >
+                        Update Email
+                    </Button>
+                </Grid>
+
+                {/* Row for New Password Fields */}
+                <Grid item xs={12} md={6}>
+                    <TextField
+                        label="New Password"
+                        type="password"
+                        fullWidth
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    <TextField
+                        label="Confirm New Password"
+                        type="password"
+                        fullWidth
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <Button 
+                        type="button" 
+                        variant="contained" 
+                        color="success" 
+                        onClick={handlePasswordUpdate}
+                    >
+                        Change Password
+                    </Button>
+                </Grid>
+            </Grid>
+
+            {/* Display error messages */}
+            <Snackbar
+                open={Boolean(errorMessage)}
+                autoHideDuration={6000}
+                onClose={() => setErrorMessage("")}
+                message={errorMessage}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            />
+            {/* Display success messages */}
+            <Snackbar
+                open={Boolean(successMessage)}
+                autoHideDuration={6000}
+                onClose={() => setSuccessMessage("")}
+                message={successMessage}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            />
         </Container>
     );
 };

@@ -64,7 +64,7 @@ export default function Home() {
           )}
 
           {user?.role === "Fan" && (
-            <Button variant="contained" color="success" onClick={() => navigate("/tickets")} sx={{ mt: 2, ml: 2 ,padding: "12px 24px", fontSize: "1.2rem" }}>
+            <Button variant="contained" color="success" onClick={() => navigate("/viewTickets")} sx={{ mt: 2, ml: 2 ,padding: "12px 24px", fontSize: "1.2rem" }}>
               Show Tickets
             </Button>
           )}

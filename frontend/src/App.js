@@ -12,6 +12,7 @@ import Profile from "./Components/Profile/Profile";
 import CreateStadium from "./Components/Stadium/CreateStadium";
 import ViewStadium from "./Components/Stadium/ViewStadium";
 import { UserProvider } from "./Context";
+import MyTickets from "./Components/Tickets/Tickets";
 function App() {
   const theme = createTheme();
   // const links = [
@@ -36,6 +37,7 @@ function App() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/viewStadium" element={<ViewStadium userType={"manager"} />} />
             <Route path="/createStadium" element={<CreateStadium />} />
+            <Route path="viewTickets" element={<MyTickets />} />
           </Routes>
         </Router>
       </ThemeProvider>
