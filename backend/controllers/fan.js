@@ -5,7 +5,6 @@ const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 });
 
 wss.on('connection', (ws) => {
-    // console.log('New client connected');
 
     ws.on('close', () => {
         console.log('Client disconnected');
@@ -31,7 +30,6 @@ const changeUsername = async (userId, newUsername) => {
     return user;
 };
 
-// Function to  the email
 const changeEmail = async (userId, newEmail) => {
     const user = await User.findById(userId);
     if (!user) {
@@ -43,7 +41,6 @@ const changeEmail = async (userId, newEmail) => {
     return user;
 };
 
-// Function to change the password
 const changePassword = async (userId, newPassword) => {
     const user = await User.findById(userId);
     if (!user) {
@@ -80,10 +77,10 @@ const editFan = async (req, res) => {
 
 const cancelTicket = async (req, res) => {
     const ticketId = req.params.ticketId;
-    const { futureDate } = req.body; // Extract futureDate from request body
+    const { futureDate } = req.body;
 
     try {
-        const ticket = await Ticket.findById(ticketId).populate('matchId'); // Populate to get match details
+        const ticket = await Ticket.findById(ticketId).populate('matchId');
         if (!ticket) {
             return res.status(404).json({ msg: 'Ticket not found' });
         }
@@ -123,7 +120,6 @@ const bookTicket = async (req, res) => {
             return res.status(400).json({ message: "You have already booked a ticket for this match." });
         }
 
-        // Check if the seat is already booked
         const seatBooked = await Ticket.findOne({ matchId, seat });
         if (seatBooked) {
             return res.status(400).json({ message: "This seat has already been booked by another user." });
@@ -167,7 +163,7 @@ const bookedTickets = async (req, res) => {
 const getTickets = async (req, res) => {
     const { userId } = req.params;
     try {
-        const tickets = await Ticket.find({ userId }).populate('matchId'); // Ensure matchId is populated
+        const tickets = await Ticket.find({ userId }).populate('matchId');
         res.status(200).json(tickets);
     } catch (err) {
         res.status(500).json({ error: err.message || 'Server Error' });

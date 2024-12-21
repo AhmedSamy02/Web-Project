@@ -1,23 +1,15 @@
 import React, { useState } from "react";
-import { 
-    Container, 
-    Grid, 
-    TextField, 
-    Button, 
-    Typography, 
-    Snackbar 
-} from "@mui/material"; 
-import axios from 'axios'; // Import Axios
+import { Container, Grid, TextField, Button, Typography, Snackbar } from "@mui/material";
+import axios from 'axios';
 
 const ProfilePage = (props) => {
     const [username, setUsername] = useState(props.data.username);
     const [email, setEmail] = useState(props.data.email);
-    const [newPassword, setNewPassword] = useState(""); // State for new password
+    const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState(""); // State for error messages
-    const [successMessage, setSuccessMessage] = useState(""); // State for success messages
+    const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
-    // Function to handle username update
     const handleUsernameUpdate = async () => {
         const body = {
             username,
@@ -33,17 +25,11 @@ const ProfilePage = (props) => {
 
             setSuccessMessage("Username updated successfully!");
             localStorage.setItem("user", JSON.stringify(response.data.user));
-            console.log("Username updated successfully:", response.data);
         } catch (error) {
-            if (error.response) {
-                setErrorMessage(error.response.data.msg); // Specific error from server
-            } else {
-                setErrorMessage("Server error: " + error.message); // Handle other errors
-            }
+            setErrorMessage(error.response?.data?.msg || "Server error: " + error.message);
         }
     };
 
-    // Function to handle email update
     const handleEmailUpdate = async () => {
         const body = {
             email,
@@ -59,17 +45,11 @@ const ProfilePage = (props) => {
 
             setSuccessMessage("Email updated successfully!");
             localStorage.setItem("user", JSON.stringify(response.data.user));
-            console.log("Email updated successfully:", response.data);
         } catch (error) {
-            if (error.response) {
-                setErrorMessage(error.response.data.msg); // Specific error from server
-            } else {
-                setErrorMessage("Server error: " + error.message); // Handle other errors
-            }
+            setErrorMessage(error.response?.data?.msg || "Server error: " + error.message);
         }
     };
 
-    // Function to handle password update
     const handlePasswordUpdate = async () => {
         if (newPassword !== confirmPassword) {
             setErrorMessage("New passwords do not match");
@@ -79,7 +59,6 @@ const ProfilePage = (props) => {
         const body = {
             password: newPassword,
             userId: props.data._id,
-            oldPassword: props.data.oldPassword // Assuming oldPassword is passed in props.data
         };
 
         try {
@@ -89,18 +68,11 @@ const ProfilePage = (props) => {
                 },
             });
 
-            // Clear password fields after successful update
             setNewPassword("");
             setConfirmPassword("");
-
             setSuccessMessage("Password updated successfully!");
-            console.log("Password updated successfully:", response.data);
         } catch (error) {
-            if (error.response) {
-                setErrorMessage(error.response.data.msg); // Specific error from server
-            } else {
-                setErrorMessage("Server error: " + error.message); // Handle other errors
-            }
+            setErrorMessage(error.response?.data?.msg || "Server error: " + error.message);
         }
     };
 
@@ -111,7 +83,6 @@ const ProfilePage = (props) => {
             </Typography>
             
             <Grid container spacing={3}>
-                {/* Row for Username */}
                 <Grid item xs={12} md={6}>
                     <TextField
                         label="Username"
@@ -125,13 +96,11 @@ const ProfilePage = (props) => {
                         type="button" 
                         variant="contained" 
                         color="success" 
-                        onClick={handleUsernameUpdate} // Update username
+                        onClick={handleUsernameUpdate}
                     >
                         Update Username
                     </Button>
                 </Grid>
-
-                {/* Row for Email */}
                 <Grid item xs={12} md={6}>
                     <TextField
                         label="Email"
@@ -146,13 +115,11 @@ const ProfilePage = (props) => {
                         type="button" 
                         variant="contained" 
                         color="success" 
-                        onClick={handleEmailUpdate} // Update email
+                        onClick={handleEmailUpdate}
                     >
                         Update Email
                     </Button>
                 </Grid>
-
-                {/* Row for New Password Fields */}
                 <Grid item xs={12} md={6}>
                     <TextField
                         label="New Password"
@@ -183,7 +150,6 @@ const ProfilePage = (props) => {
                 </Grid>
             </Grid>
 
-            {/* Display error messages */}
             <Snackbar
                 open={Boolean(errorMessage)}
                 autoHideDuration={6000}
@@ -191,7 +157,6 @@ const ProfilePage = (props) => {
                 message={errorMessage}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             />
-            {/* Display success messages */}
             <Snackbar
                 open={Boolean(successMessage)}
                 autoHideDuration={6000}

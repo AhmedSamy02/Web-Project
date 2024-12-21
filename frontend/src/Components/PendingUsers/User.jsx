@@ -5,7 +5,6 @@ import { LocationOn, Email, Wc, Cake, Person } from "@mui/icons-material";
 export default function User(props) {
   const { user } = props;
 
-  // Format birthdate
   const formatDate = (date) => {
     const birthDate = new Date(date);
     const day = birthDate.getDate().toString().padStart(2, "0");
@@ -17,7 +16,6 @@ export default function User(props) {
   return (
     <Card sx={{ maxWidth: 300, margin: "auto", boxShadow: 3, borderRadius: 2 }}>
       <CardContent>
-        {/* Display Name */}
         <Box
           sx={{
             display: "flex",
@@ -32,7 +30,6 @@ export default function User(props) {
           </Typography>
         </Box>
 
-        {/* Display Username */}
         {user.userName && (
           <Typography
             variant="body2"
@@ -44,7 +41,6 @@ export default function User(props) {
           </Typography>
         )}
 
-        {/* Display City */}
         {user.city && (
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <LocationOn sx={{ mr: 1 }} />
@@ -52,7 +48,6 @@ export default function User(props) {
           </Box>
         )}
 
-        {/* Display Address (Optional) */}
         {user.address && (
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <LocationOn sx={{ mr: 1 }} />
@@ -60,7 +55,6 @@ export default function User(props) {
           </Box>
         )}
 
-        {/* Display Email */}
         {user.email && (
           <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
             <Email sx={{ mr: 1 }} />
@@ -68,7 +62,6 @@ export default function User(props) {
           </Box>
         )}
 
-        {/* Display Gender and Birthdate */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
           {user.gender && (
             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -84,7 +77,6 @@ export default function User(props) {
           )}
         </Box>
 
-        {/* Display Role */}
         {user.role && (
           <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
             <Typography variant="body2" color="textSecondary">

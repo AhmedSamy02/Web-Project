@@ -27,11 +27,7 @@ const EditMatches = (props) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Close the popup after form submission
     setPopupVisible(false);
-    // Simulate form submission without calling the API
-    // Here you can handle any local logic or state updates
   };
 
   return (

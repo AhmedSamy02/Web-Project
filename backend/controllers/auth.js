@@ -1,11 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
-// Secret key for JWT
 const JWT_SECRET = "dasjdnwjknejkq";
 
-// Register user
 const register = async (req, res) => {
     try {
         const {
@@ -21,23 +18,19 @@ const register = async (req, res) => {
             role
         } = req.body;
 
-        // Check if the username already exists
         const existingUsername = await User.findOne({ username });
         if (existingUsername) {
             return res.status(400).json({ msg: 'Username is already taken.' });
         }
 
-        // Check if the email is already registered
         const existingEmail = await User.findOne({ email });
         if (existingEmail) {
             return res.status(400).json({ msg: 'Email is already registered.' });
         }
 
-        // Hash the password
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Create a new user with 'pending' status
         const newUser = new User({
             username,
             firstName,
@@ -49,10 +42,9 @@ const register = async (req, res) => {
             email,
             password: hashedPassword,
             role,
-            status: 'pending', // User is pending approval
+            status: 'pending',
         });
 
-        // Save the new user to the database
         const savedUser = await newUser.save();
         res.status(201).json({ msg: 'User registered, waiting for approval', user: savedUser });
     } catch (err) {
@@ -60,7 +52,6 @@ const register = async (req, res) => {
     }
 };
 
-// Login user
 const login = async (req, res) => {
     try {
         const { username, password } = req.body;

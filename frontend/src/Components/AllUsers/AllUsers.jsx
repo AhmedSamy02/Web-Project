@@ -12,16 +12,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  CircularProgress, // For loading spinner
+  CircularProgress,
 } from "@mui/material";
 import { Delete as DeleteIcon } from "@mui/icons-material";
-import User from "../PendingUsers/User"; // Import User component
+import User from "../PendingUsers/User";
 export default function AllUsers() {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch users on component mount
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -46,7 +45,6 @@ export default function AllUsers() {
     fetchUsers();
   }, []);
 
-  // Handle delete user action
   const handleDelete = async (userId) => {
     try {
       const data = localStorage.getItem("user");
@@ -59,9 +57,8 @@ export default function AllUsers() {
         },
       });
 
-      // Immediately remove deleted user from UI
-      setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId)); // Use _id to filter
-      setSelectedUser(null); // Close the dialog after deletion
+      setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId)); 
+      setSelectedUser(null);
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -74,7 +71,7 @@ export default function AllUsers() {
       </Typography>
       {loading ? (
         <Grid container justifyContent="center">
-          <CircularProgress /> {/* Loading spinner */}
+          <CircularProgress /> 
         </Grid>
       ) : users.length === 0 ? (
         <Typography variant="h6" color="textSecondary" align="center">
@@ -85,7 +82,7 @@ export default function AllUsers() {
           {users.map((user) => (
             <Grid item xs={12} sm={6} md={4} key={user._id}>
               <Card>
-                <User user={user} /> {/* Use User component here */}
+                <User user={user} /> 
                 <CardActions>
                   <Button
                     startIcon={<DeleteIcon />}
@@ -114,7 +111,7 @@ export default function AllUsers() {
               Cancel
             </Button>
             <Button
-              onClick={() => handleDelete(selectedUser._id)} // Use _id here
+              onClick={() => handleDelete(selectedUser._id)}
               color="error"
             >
               Delete

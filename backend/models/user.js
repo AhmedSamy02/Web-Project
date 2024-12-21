@@ -46,7 +46,7 @@ const UserSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        default: 'pending', // can be 'pending', 'approved', or 'disapproved'
+        default: 'pending',
         enum: ['pending', 'approved', 'disapproved']
     }
 }, { timestamps: true });

@@ -15,7 +15,7 @@ const ApproveUser = ({ id, onApprove }) => {
 
     const handleConfirm = () => {
         console.log(`Approved user with ID: ${id}`);
-        onApprove(); // Trigger removal in parent
+        onApprove();
         handleClose();
     };
 

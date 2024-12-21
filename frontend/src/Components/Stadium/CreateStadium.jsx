@@ -12,7 +12,6 @@ const CreateStadium = (props) => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // Handle change in form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -21,7 +20,6 @@ const CreateStadium = (props) => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -62,7 +60,6 @@ const CreateStadium = (props) => {
         boxShadow: 3,
       }}
     >
-      {/* Name Input */}
       <TextField
         label="Stadium Name"
         name="name"
@@ -74,7 +71,6 @@ const CreateStadium = (props) => {
         margin="normal"
       />
 
-      {/* Rows Input */}
       <TextField
         label="Number of Rows"
         type="number"
@@ -85,7 +81,7 @@ const CreateStadium = (props) => {
         required
         variant="outlined"
         margin="normal"
-        inputProps={{ min: 1 }} // Enforce minimum value of 1
+        inputProps={{ min: 1 }} 
       />
 
       <TextField
@@ -98,24 +94,22 @@ const CreateStadium = (props) => {
         required
         variant="outlined"
         margin="normal"
-        inputProps={{ min: 1 }} // Enforce minimum value of 1
+        inputProps={{ min: 1 }} 
       />
 
       <Box sx={{ display: 'flex', gap: 2, marginTop: 2 }}>
-        {/* Cancel Button */}
         <Button
           variant="outlined"
           color="secondary"
           onClick={() => {
             setFormData({ name: "", numberOfRows: 0, numberOfSeatsPerRow: 0 });
-            props.closeDialog(); // Close dialog without saving
+            props.closeDialog();
           }}
           fullWidth
         >
           Cancel
         </Button>
 
-        {/* Submit Button */}
         <Button
           type="submit"
           variant="contained"
@@ -127,7 +121,6 @@ const CreateStadium = (props) => {
         </Button>
       </Box>
 
-      {/* Snackbar for feedback */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={6000}

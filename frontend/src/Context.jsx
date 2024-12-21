@@ -1,11 +1,9 @@
-// Context/UserContext.js
 import React, { createContext, useState, useEffect } from 'react';
 
 export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    // Initialize user from localStorage if available
     const savedUser = localStorage.getItem('user');
     return savedUser ? JSON.parse(savedUser) : null;
   });

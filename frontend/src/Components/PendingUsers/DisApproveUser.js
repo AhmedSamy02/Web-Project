@@ -15,7 +15,7 @@ const DisApproveUser = ({ id, onDisapprove }) => {
 
   const handleConfirm = () => {
     console.log(`Disapproved user with ID: ${id}`);
-    onDisapprove(); // Trigger removal in parent
+    onDisapprove();
     handleClose();
   };
 

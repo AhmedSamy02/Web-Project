@@ -64,15 +64,14 @@ export default function Form() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
-
   const handleFormSubmit = async (values, { resetForm }) => {
     try {
       const url = isLogin
         ? "http://localhost:3001/auth/login"
         : "http://localhost:3001/auth/register";
-
+  
       const response = await axios.post(url, values);
-
+  
       if (isLogin) {
         if (response.data.token) {
           console.log("Login Successful", response.data);
@@ -87,13 +86,21 @@ export default function Form() {
         console.log("Registration Successful", response.data);
         resetForm();
         setPageType("login");
+        showSnackbar("Registration successful! Please login.", "success");
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Something went wrong";
-      console.error("Error during form submission:", errorMessage);
-      showSnackbar(errorMessage, "error");
+  
+      if (isRegister && error.response?.status === 409) {
+        showSnackbar("User already exists. Please try another username.", "error");
+      } else if (isLogin && error.response?.status === 401) {
+        showSnackbar("Invalid username or password.", "error");
+      } else {
+        showSnackbar(errorMessage, "error");
+      }
     }
   };
+  
 
   const showSnackbar = (message, severity) => {
     setSnackbarMessage(message);

@@ -32,7 +32,6 @@ const MatchCard = ({ matchDetails, onEdit }) => {
   const [userBookedSeat, setUserBookedSeat] = useState(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   
-  // Snackbar states
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
@@ -259,7 +258,6 @@ const MatchCard = ({ matchDetails, onEdit }) => {
         ) : null}
       </CardContent>
 
-      {/* Booking Dialog */}
       <Dialog open={openBooking} onClose={handleCloseBooking} fullWidth maxWidth="sm">
         <DialogTitle>Book Your Seat</DialogTitle>
         <DialogContent>
@@ -282,7 +280,7 @@ const MatchCard = ({ matchDetails, onEdit }) => {
                       }
                       fullWidth
                       onClick={() => handleSeatSelection(seat)}
-                      disabled={bookedSeats.includes(seat) || isProcessingPayment} // Disable if seat is booked or payment is processing
+                      disabled={bookedSeats.includes(seat) || isProcessingPayment} 
                       sx={{
                         color: bookedSeats.includes(seat) ? "white" : "inherit",
                         backgroundColor: bookedSeats.includes(seat) ? "red" : "inherit",
@@ -336,7 +334,6 @@ const MatchCard = ({ matchDetails, onEdit }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for notifications */}
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}
@@ -371,7 +368,7 @@ const ViewMatches = () => {
       const response = await axios.get("http://localhost:3001/manager/allMatches");
       const updatedMatches = response.data.map(match => ({
         ...match,
-        availability: !isMatchTodayOrTomorrow(match.dateTime) // Set availability based on today or tomorrow
+        availability: !isMatchTodayOrTomorrow(match.dateTime) 
       }));
       setMatches(updatedMatches);
     } catch (error) {
@@ -420,7 +417,7 @@ const ViewMatches = () => {
       dateTime: "",
       mainReferee: "",
       linesmen: ["", ""],
-      availability: true, // Set to true by default
+      availability: true,
     });
     setOpenDialog(true);
   };
@@ -539,7 +536,7 @@ const ViewMatches = () => {
             onChange={(e) => setNewMatch({ ...newMatch, dateTime: e.target.value })}
             sx={{ marginBottom: 2 }}
             type="date"
-            inputProps={{ min: new Date().toISOString().split("T")[0] }} // Prevent past date selection
+            inputProps={{ min: new Date().toISOString().split("T")[0] }}
           />
 
           <TextField

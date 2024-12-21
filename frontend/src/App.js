@@ -15,10 +15,6 @@ import { UserProvider } from "./Context";
 import MyTickets from "./Components/Tickets/Tickets";
 function App() {
   const theme = createTheme();
-  // const links = [
-  //   { path: "/userRequest", label: "User Request" },
-  //   { path: "/deleteUser", label: "Delete User" },
-  // ];
   const links = [
     { path: "/viewStadium", label: "View Stadium" },
   ];

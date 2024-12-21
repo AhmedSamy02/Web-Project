@@ -13,7 +13,6 @@ export default function PendingUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch users from API
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
@@ -39,7 +38,6 @@ export default function PendingUsers() {
     fetchUsers();
   }, []);
 
-  // Handle approve or disapprove action
   const handleUserAction = async (userId, action) => {
     try {
       const data = localStorage.getItem("user");
@@ -58,25 +56,22 @@ export default function PendingUsers() {
       );
 
       if (response.status === 200) {
-        // Update the state to remove the approved/disapproved user
         setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
       }
     } catch (error) {
       console.error(`Error performing ${action}:`, error);
-      alert(`Failed to ${action} user: ${error.message}`); // Show error alert
+      alert(`Failed to ${action} user: ${error.message}`);
     }
   };
 
   return (
     <Box sx={{ padding: 2 }}>
-      {/* Header */}
       <Box sx={{ marginBottom: 2, textAlign: "center" }}>
         <Typography variant="h5" component="div">
           Requests
         </Typography>
       </Box>
 
-      {/* Loading Indicator */}
       {loading ? (
         <Box
           sx={{
@@ -104,22 +99,20 @@ export default function PendingUsers() {
                   textAlign: "center",
                 }}
               >
-                {/* User Component */}
                 <User user={user} />
 
-                {/* Approve and Disapprove Buttons */}
                 <Box sx={{ marginTop: 2, display: "flex", justifyContent: "space-around" }}>
                   <Button
                     variant="contained"
                     color="success"
-                    onClick={() => handleUserAction(user._id, "approve")} // Use _id here
+                    onClick={() => handleUserAction(user._id, "approve")} 
                   >
                     Approve
                   </Button>
                   <Button
                     variant="contained"
                     color="error"
-                    onClick={() => handleUserAction(user._id, "disapprove")} // Use _id here
+                    onClick={() => handleUserAction(user._id, "disapprove")} 
                   >
                     Disapprove
                   </Button>

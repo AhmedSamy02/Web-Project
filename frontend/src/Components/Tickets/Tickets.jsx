@@ -30,7 +30,7 @@ const MyTickets = () => {
     const fetchBookedTickets = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:3001/fan/getTickets/${userId}`, { // Use backticks here
+        const response = await axios.get(`http://localhost:3001/fan/getTickets/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setTickets(response.data);
@@ -42,7 +42,7 @@ const MyTickets = () => {
     };
 
     fetchBookedTickets();
-  }, [userId]); // It's good practice to include userId as a dependency
+  }, [userId]); 
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -61,18 +61,18 @@ const MyTickets = () => {
   const confirmCancel = async () => {
     try {
       const token = localStorage.getItem('token');
-      const ticket = tickets.find(ticket => ticket._id === selectedTicketId); // Find the selected ticket
-      const futureDate = ticket.matchId.dateTime; // Get the dateTime from the selected ticket's matchId
+      const ticket = tickets.find(ticket => ticket._id === selectedTicketId);
+      const futureDate = ticket.matchId.dateTime; 
   
       await axios.delete(`http://localhost:3001/fan/cancelTicket/${selectedTicketId}`, {
         headers: { Authorization: `Bearer ${token}` },
-        data: { futureDate } // Pass futureDate in the data object
+        data: { futureDate } 
       });
       
       showSnackbar('Ticket canceled successfully!', 'success');
       setTickets((prev) => prev.filter(ticket => ticket._id !== selectedTicketId));
     } catch (error) {
-      console.error('Failed to cancel ticket:', error); // Log the error for better debugging
+      console.error('Failed to cancel ticket:', error); 
       showSnackbar('Failed to cancel the ticket. Please try again.', 'error');
     } finally {
       setConfirmCancelOpen(false);
@@ -111,7 +111,6 @@ const MyTickets = () => {
         </List>
       )}
 
-      {/* Confirmation Dialog for Cancellation */}
       <Dialog open={confirmCancelOpen} onClose={() => setConfirmCancelOpen(false)}>
         <DialogTitle>Confirm Cancellation</DialogTitle>
         <DialogContent>
@@ -127,7 +126,6 @@ const MyTickets = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for notifications */}
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
         <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}

@@ -1,4 +1,3 @@
-// Admin route to approve or disapprove a user
 const User = require('../models/user');
 const approveOrDisapproveUser = async (req, res) => {
     try {
